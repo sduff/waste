@@ -1,6 +1,6 @@
 {
 	"domain": "http://simonduff.net",
-	"templates": "/Users/Local/waste/templates/",
-	"src": "/Users/Local/waste/src/",
-	"out": "/Users/Local/waste/sduff.github.io/"
+	"templates": "/opt/waste/templates/",
+	"src": "/opt/waste/src/",
+	"out": "/opt/waste/sduff.github.io/"
 }
