@@ -96,7 +96,19 @@ for f in sf:
                 state = 1
         if state == 1:
             text += l
-    print metadata
+
+    # Metadata Options
+    #title: huzzah
+    #url:    /index.html
+    #sm_f:   daily, hourly
+    #sm_p:   0.0-1.0
+    #tags:   comma, separated, tags
+    #state:  true, publish, draft, false
+    #summary:    yada yada yada
+    #template:   list of templates to use
+    #update_index:   false
+    #comments:   false
+
     name = os.path.basename(f)[:-3] # remove .md from end
     if "title" not in metadata:
         metadata["title"] = name
@@ -110,12 +122,15 @@ for f in sf:
 
     metadata["filename"] = os.path.join(out,metadata["url"].strip("/"))
 
-    page[name] = {}
-    page[name]["metadata"] = metadata
-    page[name]["text"] = text
+    if not "draft" in metadata:
+        page[name] = {}
+        page[name]["metadata"] = metadata
+        page[name]["text"] = text
 
-    logging.debug("Page %s metadata: %s"%(name, metadata))
-    logging.debug("Page %s markdown: %s"%(name, text))
+        logging.debug("Will publish: %s"%name)
+    else:
+        logging.debug("Not publishing: %s"%name)
+
  
 
 for current_page in page.keys():
