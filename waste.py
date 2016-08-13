@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+#!/usr/bin/env python 
 # What, Another Site Templating Engine? WASTE
 # Simon Duff <simon.duff@gmail.com>
 # v0.5
@@ -51,7 +50,7 @@ class Renderer(mistune.Renderer):
 md = mistune.Markdown(renderer=Renderer())
 
 # Configre Logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 # Read Config
 try:
@@ -73,7 +72,11 @@ logging.debug("Source Files: %s", sf)
 # Read all templates
 templates = {}
 for t in glob.glob(os.path.join(template_dir,"*")):
-    templates[os.path.basename(t)] = Template(open(t).read())
+    tt = open(t).read()
+    templates[os.path.basename(t)] = Template(tt)
+
+# read the comment fragment
+comment_html = templates["comments"]
 
 page = {}
 for f in sf:
@@ -108,6 +111,7 @@ for f in sf:
     #template:   list of templates to use
     #update_index:   false
     #comments:   false
+    #mailinglist
 
     name = os.path.basename(f)[:-3] # remove .md from end
     if "title" not in metadata:
@@ -118,6 +122,8 @@ for f in sf:
         metadata["url"] = "/%s/index.html"%name
     if metadata["url"][0] != "/":
         metadata["url"] = "/%s"%metadata["url"]
+    metadata["furl"] = "%s%s"%(domain,metadata["url"])
+    print metadata["furl"]
     metadata["reverse_links"] = {}
 
     metadata["filename"] = os.path.join(out,metadata["url"].strip("/"))
@@ -131,12 +137,21 @@ for f in sf:
     else:
         logging.debug("Not publishing: %s"%name)
 
- 
-
 for current_page in page.keys():
     logging.debug("Processing page %s"%current_page)
     metadata = page[current_page]["metadata"]
-    text = page[current_page]["text"]
+    text = page[current_page]["text"].decode('utf-8',"replace")
+
+    if "comments" in metadata:
+        metadata["comments"] = templates["comments"].safe_substitute(metadata)
+    else:
+        metadata["comments"] = ""
+
+    if "mailinglist" in metadata:
+        metadata["mailinglist"] = templates["mailinglist"].safe_substitute(metadata)
+    else:
+        metadata["mailinglist"] = ""
+
     try:
         metadata["html"] = md.render(text)
     except Exception as e:
@@ -171,10 +186,11 @@ sitemap_file= open(os.path.join(out,"sitemap.xml"),"w")
 sitemap_file.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n")
 for k in page.keys():
     metadata = page[k]["metadata"]
+    logging.info("Generated %s, %s"%(k, metadata["filename"]))
     try:os.makedirs(os.path.dirname(metadata["filename"]))
     except: pass
     html_file = open(metadata["filename"],"w")
-    html_file.write(metadata["output"])
+    html_file.write(metadata["output"].encode("utf-8"))
     html_file.close()
 
     # Default values for sitemap entries
@@ -188,8 +204,6 @@ for k in page.keys():
 # close sitemap file
 sitemap_file.write("</urlset>")
 sitemap_file.close()
-
-logging.debug("Site built!")
 
 commit_msg = "Site updated by waste"
 print "Please run the following commands" # Could automate this
