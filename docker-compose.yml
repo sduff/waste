@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  image:
+    build: .
+    volumes:
+      - ./build:/build
+      - ./src:/src:ro
+      - ./static:/static:ro
+      - ./templates:/templates:ro
