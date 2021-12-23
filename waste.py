@@ -79,6 +79,7 @@ for root, dirs, filenames in os.walk(SOURCE_PATH):
         # update markdown if requireed before rendering
         # update mustache object
         obj["md"] = content
+        obj["html"] = mistune.html(obj["md"])
         obj["template"] = "default" if "template" not in obj else obj["template"]
 
         # load the template
